@@ -52,8 +52,8 @@ int main(int argc, char** argv) {
     vector<Predictions> predictions;
     sp.predictOne(query_vec, predictions);
     for (int i = 0; i < predictions.size(); i++) {
-      cout << i << "[" << predictions[i].first << "]: ";
-      sp.printDoc(cout, sp.baseDocs_[predictions[i].second]);
+      auto pred = predictions[i];
+      cout << pred.second << ":" << pred.first << "\t";
     }
     cout << "\n";
   }

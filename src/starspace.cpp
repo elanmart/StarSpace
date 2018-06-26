@@ -12,6 +12,7 @@
 #include <iostream>
 #include <queue>
 #include <unordered_set>
+#include <stdexcept>
 
 #include <boost/algorithm/string.hpp>
 
@@ -298,6 +299,11 @@ void StarSpace::predictOne(
   }
   // get the first K predictions
   int i = 0;
+
+  if (args_->K == -1) {
+    args_->K = baseDocVectors_.size();
+  }
+
   while (i < args_->K && heap.size() > 0) {
     pred.push_back(heap.top());
     heap.pop();
@@ -403,7 +409,7 @@ void StarSpace::evaluate() {
   auto evalThread = [&] (int idx, int start, int end) {
     metrics[idx].clear();
     for (int i = start; i < end; i++) {
-      auto s = evaluateOne(examples[i].LHSTokens, examples[i].RHSTokens, predictions[i], args_->excludeLHS);
+      auto s = evaluateOne(examples[i].LHSTokens, {}, predictions[i], args_->excludeLHS);
       metrics[idx].add(s);
     }
   };
@@ -431,18 +437,11 @@ void StarSpace::evaluate() {
     // print out prediction results to file
     ofstream ofs(args_->predictionFile);
     for (int i = 0; i < N; i++) {
-      ofs << "Example " << i << ":\nLHS:\n";
-      printDoc(ofs, examples[i].LHSTokens);
-      ofs << "RHS: \n";
-      printDoc(ofs, examples[i].RHSTokens);
-      ofs << "Predictions: \n";
       for (auto pred : predictions[i]) {
         if (pred.second == 0) {
-          ofs << "(++) [" << pred.first << "]\t";
-          printDoc(ofs, examples[i].RHSTokens);
+          throw  std::runtime_error("TODO(elanmart)");
         } else {
-          ofs << "(--) [" << pred.first << "]\t";
-          printDoc(ofs, baseDocs_[pred.second - 1]);
+          ofs << pred.second - 1 << ":" << pred.first << "\t";
         }
       }
       ofs << "\n";
